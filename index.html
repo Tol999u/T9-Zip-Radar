@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>tol9u 부동산 시세 레이더 v17.0 (700+ 대용량 DB)</title>
+  <title>tol9u 부동산 시세 레이더 v18.0 (네이버 부동산 인앱 연동)</title>
   <!-- Tailwind CSS & Chart.js & FontAwesome -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -22,7 +22,7 @@
       -webkit-overflow-scrolling: touch;
     }
     
-    /* 지역 탭 가로 드래그 스크롤 전용 */
+    /* 지역 탭 가로 스크롤 전용 */
     .region-tab-scroll {
       display: flex;
       overflow-x: auto;
@@ -50,12 +50,15 @@
           </div>
           <div>
             <h1 class="font-bold text-xs text-slate-800 tracking-tight leading-none">tol9u 부동산 시세 레이더</h1>
-            <span class="text-[8px] text-indigo-600 font-semibold">Real-time Radar v17.0 (700+ DB)</span>
+            <span class="text-[8px] text-indigo-600 font-semibold">Real-time Radar v18.0 (네이버 인앱 연동)</span>
           </div>
         </div>
         <div class="flex items-center gap-1">
+          <button onclick="openNaverLandInApp('서울 아파트')" class="flex items-center gap-1 text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200 font-medium">
+            <i class="fa-solid fa-building-ngo"></i> 네이버부동산 인앱
+          </button>
           <button onclick="toggleKnowledgeModal()" class="flex items-center gap-1 text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200 font-medium">
-            <i class="fa-solid fa-book-open"></i> 상식백과 (52)
+            <i class="fa-solid fa-book-open"></i> 상식백과
           </button>
           <button onclick="openAddModal()" class="w-5 h-5 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center font-bold hover:bg-indigo-100 transition">
             <i class="fa-solid fa-plus text-[9px]"></i>
@@ -66,7 +69,7 @@
       <!-- Search Input -->
       <div class="mt-1 relative">
         <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-slate-400 text-[10px]"></i>
-        <input type="text" id="searchInput" oninput="handleMainSearch(this.value)" placeholder="전국 동네명(강남, 노원, 분당, 춘천...) 또는 아파트 검색..." 
+        <input type="text" id="searchInput" oninput="handleMainSearch(this.value)" placeholder="전국 동네명 또는 아파트 검색 (네이버 연동)..." 
           class="w-full pl-7 pr-3 py-1 bg-slate-100 rounded-lg text-[11px] focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
         <!-- 실시간 자동완성 결과 드롭다운 -->
         <ul id="mainPredictList" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-52 overflow-y-auto hidden z-[9999]"></ul>
@@ -174,10 +177,33 @@
   <footer class="py-1.5 px-2 text-center text-[8px] text-slate-400 border-t border-slate-200 bg-white space-y-0.5">
     <div class="flex items-center justify-center gap-1">
       <span id="footerT9" onclick="promptAdminPassword()" class="font-bold text-indigo-600 cursor-pointer hover:underline bg-indigo-50 px-1 py-0.2 rounded border border-indigo-100">T9</span>
-      <span class="font-bold text-slate-700">tol9u 부동산 시세 레이더 v17.0</span>
+      <span class="font-bold text-slate-700">tol9u 부동산 시세 레이더 v18.0</span>
     </div>
     <p>© 2026 tol9u. All rights reserved. | 문의: <a href="mailto:dotol9u@gmail.com" class="underline">dotol9u@gmail.com</a></p>
   </footer>
+
+  <!-- Modal: [신규] 네이버 부동산 모바일 인앱(In-App) 뷰어 -->
+  <div id="naverInAppModal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex justify-end flex-col">
+    <div class="bg-white rounded-t-2xl w-full h-[90vh] flex flex-col shadow-2xl relative">
+      <!-- 뷰어 상단 컨트롤 바 -->
+      <div class="p-2.5 bg-slate-800 text-white rounded-t-2xl flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="bg-emerald-500 text-white text-[9px] px-1.5 py-0.5 rounded font-extrabold">NAVER</span>
+          <h3 id="naverInAppTitle" class="text-xs font-bold truncate max-w-[200px]">네이버 부동산 인앱 조회</h3>
+        </div>
+        <div class="flex items-center gap-2">
+          <a id="naverExternalBtn" href="#" target="_blank" class="text-[10px] bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-slate-200">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> 새 창
+          </a>
+          <button onclick="closeNaverLandInApp()" class="text-slate-400 hover:text-white text-base px-1"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+      <!-- 네이버 부동산 모바일 웹뷰 iframe -->
+      <div class="flex-1 w-full relative bg-slate-100">
+        <iframe id="naverFrame" class="w-full h-full border-none" src="about:blank"></iframe>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal: 상세 드로어 -->
   <div id="detailDrawer" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex justify-end flex-col">
@@ -200,6 +226,12 @@
           <p id="drawerAskPrice" class="text-xs font-bold text-indigo-600">- 만원</p>
         </div>
       </div>
+      
+      <!-- 네이버 부동산 인앱 연동 버튼 -->
+      <button id="drawerNaverBtn" onclick="" class="w-full mb-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs flex items-center justify-center gap-1 shadow-sm">
+        <i class="fa-solid fa-building-circle-check"></i> 네이버 부동산 실시간 매물/호가 인앱 보기
+      </button>
+
       <div class="mb-2.5">
         <h3 class="text-[10px] font-bold text-slate-500 mb-1"><i class="fa-solid fa-chart-line"></i> 최근 8주 시세 추이</h3>
         <div class="h-32 w-full bg-slate-50 p-1.5 rounded-xl border border-slate-100">
@@ -219,23 +251,23 @@
     </div>
   </div>
 
-  <!-- Modal: 단지 추가 -->
+  <!-- Modal: 단지 추가 (검증 데이터 자동 산출) -->
   <div id="addModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-3">
     <div class="bg-white rounded-2xl w-full max-w-xs p-3.5 shadow-2xl relative">
       <h3 class="text-xs font-bold text-slate-800 mb-1.5">신규 관심 단지 추가</h3>
       
-      <div id="selectedAptSummaryCard" class="hidden mb-2 p-2 bg-indigo-50 border border-indigo-100 rounded-xl text-[10px] text-indigo-900">
+      <div id="selectedAptSummaryCard" class="hidden mb-2 p-2 bg-emerald-50 border border-emerald-100 rounded-xl text-[10px] text-emerald-900">
         <p class="font-bold flex items-center justify-between">
           <span id="summaryAptName">아파트명</span>
-          <span id="summaryAptRegion" class="text-[8px] bg-indigo-200 px-1 py-0.2 rounded">지역</span>
+          <span id="summaryAptRegion" class="text-[8px] bg-emerald-200 px-1 py-0.2 rounded">지역</span>
         </p>
         <p class="mt-0.5 text-[9px] text-slate-600">
-          실거래가: <strong id="summaryRealPrice" class="text-slate-800">0억</strong> | 호가: <strong id="summaryAskPrice" class="text-indigo-600">0억</strong>
+          검증 실거래가: <strong id="summaryRealPrice" class="text-slate-800">0억</strong> | 호가: <strong id="summaryAskPrice" class="text-emerald-700">0억</strong>
         </p>
       </div>
 
       <div class="relative mb-2">
-        <label class="block text-[9px] font-medium text-slate-500 mb-0.5">전국 700개+ 아파트 실시간 예측검색</label>
+        <label class="block text-[9px] font-medium text-slate-500 mb-0.5">전국 아파트 실시간 예측검색</label>
         <input type="text" id="modalSearchName" oninput="onModalSearchInput(this.value)" placeholder="예: 강남, 서초, 노원, 춘천, 이편한..." 
           class="w-full px-2 py-1 text-xs bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
         <ul id="autoCompleteList" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-48 overflow-y-auto hidden z-[9999]"></ul>
@@ -245,34 +277,34 @@
         <div class="grid grid-cols-2 gap-1.5">
           <div>
             <label class="block text-[9px] font-medium text-slate-500">지역</label>
-            <input type="text" id="modalRegion" required class="w-full px-2 py-0.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+            <input type="text" id="modalRegion" readonly required class="w-full px-2 py-0.5 text-xs bg-slate-100 border border-slate-200 rounded-lg font-bold text-slate-700">
           </div>
           <div>
             <label class="block text-[9px] font-medium text-slate-500">평형</label>
-            <input type="text" id="modalType" required class="w-full px-2 py-0.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+            <input type="text" id="modalType" readonly required class="w-full px-2 py-0.5 text-xs bg-slate-100 border border-slate-200 rounded-lg font-bold text-slate-700">
           </div>
         </div>
         <div class="grid grid-cols-2 gap-1.5">
           <div>
-            <label class="block text-[9px] font-medium text-slate-500">실거래가 (만원)</label>
-            <input type="number" id="modalRealPrice" required class="w-full px-2 py-0.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+            <label class="block text-[9px] font-medium text-slate-500">검증 실거래가 (만원)</label>
+            <input type="number" id="modalRealPrice" readonly required class="w-full px-2 py-0.5 text-xs bg-slate-100 border border-slate-200 rounded-lg font-bold text-slate-800">
           </div>
           <div>
-            <label class="block text-[9px] font-medium text-slate-500">최저 호가 (만원)</label>
-            <input type="number" id="modalAskPrice" required class="w-full px-2 py-0.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+            <label class="block text-[9px] font-medium text-slate-500">네이버 최저호가 (만원)</label>
+            <input type="number" id="modalAskPrice" readonly required class="w-full px-2 py-0.5 text-xs bg-slate-100 border border-slate-200 rounded-lg font-bold text-indigo-600">
           </div>
         </div>
         <div>
-          <label class="block text-[9px] font-medium text-slate-500">주요 호재</label>
-          <input type="text" id="modalUpside" class="w-full px-2 py-0.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+          <label class="block text-[9px] font-medium text-slate-500">주요 호재 (KB/아실 기준)</label>
+          <input type="text" id="modalUpside" readonly class="w-full px-2 py-0.5 text-xs bg-slate-100 border border-slate-200 rounded-lg text-slate-600">
         </div>
         <div>
-          <label class="block text-[9px] font-medium text-slate-500">리스크 요인</label>
-          <input type="text" id="modalRisk" class="w-full px-2 py-0.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+          <label class="block text-[9px] font-medium text-slate-500">주의 리스크</label>
+          <input type="text" id="modalRisk" readonly class="w-full px-2 py-0.5 text-xs bg-slate-100 border border-slate-200 rounded-lg text-slate-600">
         </div>
         <div class="flex gap-1 pt-1">
           <button type="button" onclick="closeAddModal()" class="w-1/2 py-1 text-xs bg-slate-100 font-medium text-slate-600 rounded-lg">취소</button>
-          <button type="submit" class="w-1/2 py-1 text-xs bg-indigo-600 font-medium text-white rounded-lg shadow">등록</button>
+          <button type="submit" class="w-1/2 py-1 text-xs bg-indigo-600 font-medium text-white rounded-lg shadow">관심 단지 등록</button>
         </div>
       </form>
     </div>
@@ -650,6 +682,30 @@
       renderCards();
     }
 
+    // --- [신규] 네이버 부동산 인앱(In-App) 모바일 스마트 연동 ---
+    function openNaverLandInApp(query) {
+      const modal = document.getElementById('naverInAppModal');
+      const iframe = document.getElementById('naverFrame');
+      const title = document.getElementById('naverInAppTitle');
+      const externalBtn = document.getElementById('naverExternalBtn');
+
+      const encodedQuery = encodeURIComponent(query);
+      const naverMobileUrl = `https://m.land.naver.com/search/result/${encodedQuery}`;
+
+      title.innerText = `'${query}' 네이버 부동산 조회`;
+      externalBtn.href = naverMobileUrl;
+      iframe.src = naverMobileUrl;
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeNaverLandInApp() {
+      const modal = document.getElementById('naverInAppModal');
+      const iframe = document.getElementById('naverFrame');
+      iframe.src = 'about:blank';
+      modal.classList.add('hidden');
+    }
+
     async function searchPublicAptApi(query) {
       try {
         const response = await fetch(`https://api.vworld.kr/req/search?service=search&request=search&version=2.0&crs=EPSG:3857&size=10&page=1&query=${encodeURIComponent(query)}&type=place&category=apt&key=CEB52025-E065-3832-927F-B6038B1C333D`);
@@ -693,7 +749,7 @@
       }
 
       if (matches.length === 0) {
-        list.innerHTML = `<li class="px-2.5 py-2 text-xs text-slate-400 text-center">'${val}' 관련 아파트 없음 (직접 추가 가능)</li>`;
+        list.innerHTML = `<li onclick="openNaverLandInApp('${val}')" class="px-2.5 py-2 text-xs text-indigo-600 hover:bg-indigo-50 font-bold cursor-pointer text-center flex items-center justify-center gap-1"><i class="fa-solid fa-magnifying-glass"></i> '${val}' 네이버 부동산 인앱으로 바로 찾기</li>`;
         list.classList.remove('hidden');
         return;
       }
@@ -724,6 +780,12 @@
 
       document.getElementById('drawerRealPrice').innerText = `${(item.types[0].realPrice/10000).toFixed(2)} 억원`;
       document.getElementById('drawerAskPrice').innerText = `${(item.types[0].askPrice/10000).toFixed(2)} 억원`;
+
+      // 네이버 부동산 인앱 연결 버튼
+      const naverBtn = document.getElementById('drawerNaverBtn');
+      naverBtn.onclick = function() {
+        openNaverLandInApp(`${item.region} ${item.district||''} ${item.name}`);
+      };
 
       const ctx = document.getElementById('drawerChart').getContext('2d');
       if (currentChart) currentChart.destroy();
