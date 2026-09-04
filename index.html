@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>tol9u 부동산 시세 레이더 v9.0</title>
+  <title>tol9u 부동산 시세 레이더 v10.0</title>
   <!-- Tailwind CSS & Chart.js & FontAwesome -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -14,9 +14,10 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
-    /* 정확히 4개 카드가 안 잘리고 잘 들어가도록 스크롤 높이 조정 */
+    /* 정확히 4개 카드가 잘리지 않고 한눈에 100% 들어오도록 정밀 설계된 높이 */
     .card-scroll-area {
-      max-height: 430px;
+      height: 325px;
+      max-height: 325px;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
     }
@@ -25,7 +26,7 @@
     .down-blue { color: #3b82f6; }
     .bg-up-red { background-color: #fff1f2; color: #e11d48; }
     .bg-down-blue { background-color: #eff6ff; color: #2563eb; }
-    .pinned-card { border: 2px solid #6366f1 !important; background-color: #faf5ff; }
+    .pinned-card { border: 1.5px solid #6366f1 !important; background-color: #faf5ff; }
   </style>
 </head>
 <body class="max-w-[430px] mx-auto min-h-screen bg-slate-50 shadow-2xl relative border-x border-slate-200 flex flex-col justify-between">
@@ -33,102 +34,100 @@
   <!-- Main Content Wrapper -->
   <div class="pb-1">
     <!-- Top Header -->
-    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 px-3.5 py-2">
+    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 px-3 py-1.5">
       <div class="flex items-center justify-between gap-2">
-        <div class="flex items-center gap-2">
-          <div id="topLogo" class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm cursor-pointer">
+        <div class="flex items-center gap-1.5">
+          <div id="topLogo" class="w-6 h-6 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-sm cursor-pointer">
             T9
           </div>
           <div>
             <h1 class="font-bold text-xs text-slate-800 tracking-tight leading-none">tol9u 부동산 시세 레이더</h1>
-            <span class="text-[8px] text-indigo-600 font-semibold">Real-time Radar v9.0</span>
+            <span class="text-[8px] text-indigo-600 font-semibold">Real-time Radar v10.0</span>
           </div>
         </div>
         <div class="flex items-center gap-1">
-          <button onclick="toggleKnowledgeModal()" class="flex items-center gap-1 text-[10px] bg-amber-50 text-amber-700 px-2 py-1 rounded-full border border-amber-200 font-medium">
-            <i class="fa-solid fa-book-open"></i> 상식백과 (50+)
+          <button onclick="toggleKnowledgeModal()" class="flex items-center gap-1 text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200 font-medium">
+            <i class="fa-solid fa-book-open"></i> 상식백과 (52)
           </button>
-          <button onclick="openAddModal()" class="w-6 h-6 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center font-bold hover:bg-indigo-100 transition">
-            <i class="fa-solid fa-plus text-[10px]"></i>
+          <button onclick="openAddModal()" class="w-5 h-5 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center font-bold hover:bg-indigo-100 transition">
+            <i class="fa-solid fa-plus text-[9px]"></i>
           </button>
         </div>
       </div>
 
-      <!-- Search Input (단지명 + 지역명 통합 자동완성) -->
-      <div class="mt-1.5 relative">
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2 text-slate-400 text-[11px]"></i>
-        <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="지역명(서울, 송파...) 또는 단지명 검색..." 
-          class="w-full pl-8 pr-4 py-1 bg-slate-100 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
-        <!-- 메인화면 검색 자동완성 드롭다운 -->
-        <ul id="mainSearchPredictList" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto hidden z-40"></ul>
+      <!-- Search Input (자동완성 팝업 최우선 보장) -->
+      <div class="mt-1 relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-slate-400 text-[10px]"></i>
+        <input type="text" id="searchInput" oninput="handleMainSearch(this.value)" placeholder="지역명(서울, 송파...) 또는 아파트명 검색..." 
+          class="w-full pl-7 pr-3 py-1 bg-slate-100 rounded-lg text-[11px] focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+        <!-- 실시간 자동완성 결과 드롭다운 -->
+        <ul id="mainPredictList" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-48 overflow-y-auto hidden z-50"></ul>
       </div>
     </header>
 
     <!-- KPI Summary Strip -->
-    <section class="p-2.5 grid grid-cols-3 gap-1.5">
-      <div class="bg-white p-1.5 rounded-xl border border-slate-100 shadow-sm text-center">
-        <p class="text-[9px] text-slate-400 font-medium">관심 단지</p>
-        <p id="kpiTotal" class="text-sm font-bold text-slate-800">0</p>
+    <section class="p-2 grid grid-cols-3 gap-1">
+      <div class="bg-white p-1 rounded-lg border border-slate-100 shadow-sm text-center">
+        <p class="text-[8px] text-slate-400 font-medium">관심 단지</p>
+        <p id="kpiTotal" class="text-xs font-bold text-slate-800">0</p>
       </div>
-      <div class="bg-white p-1.5 rounded-xl border border-slate-100 shadow-sm text-center">
-        <p class="text-[9px] text-slate-400 font-medium">주간 상승</p>
-        <p id="kpiUp" class="text-sm font-bold up-red">0</p>
+      <div class="bg-white p-1 rounded-lg border border-slate-100 shadow-sm text-center">
+        <p class="text-[8px] text-slate-400 font-medium">주간 상승</p>
+        <p id="kpiUp" class="text-xs font-bold up-red">0</p>
       </div>
-      <div class="bg-white p-1.5 rounded-xl border border-slate-100 shadow-sm text-center">
-        <p class="text-[9px] text-slate-400 font-medium">주간 하락</p>
-        <p id="kpiDown" class="text-sm font-bold down-blue">0</p>
+      <div class="bg-white p-1 rounded-lg border border-slate-100 shadow-sm text-center">
+        <p class="text-[8px] text-slate-400 font-medium">주간 하락</p>
+        <p id="kpiDown" class="text-xs font-bold down-blue">0</p>
       </div>
     </section>
 
     <!-- 광고 배너 1 -->
-    <div class="px-2.5 mb-2">
-      <div class="bg-gradient-to-r from-slate-800 via-indigo-900 to-slate-900 border border-indigo-500/30 rounded-xl px-2.5 py-2 text-white shadow-sm flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <div class="w-6 h-6 rounded bg-amber-400 text-slate-900 flex items-center justify-center font-bold text-xs">
-            Ad
-          </div>
+    <div class="px-2 mb-1.5">
+      <div class="bg-gradient-to-r from-slate-800 via-indigo-900 to-slate-900 border border-indigo-500/30 rounded-lg px-2 py-1.5 text-white shadow-sm flex items-center justify-between">
+        <div class="flex items-center gap-1.5">
+          <div class="w-5 h-5 rounded bg-amber-400 text-slate-900 flex items-center justify-center font-bold text-[9px]">Ad</div>
           <div>
-            <p class="text-[11px] font-bold tracking-tight">메인 스폰서 프리미엄 배너</p>
-            <p class="text-[9px] text-indigo-200">배너 광고 문의 및 제휴 서비스</p>
+            <p class="text-[10px] font-bold leading-none">메인 스폰서 프리미엄 배너</p>
+            <p class="text-[8px] text-indigo-200">배너 광고 문의 및 제휴 서비스</p>
           </div>
         </div>
-        <span class="text-[9px] bg-amber-400 text-slate-900 px-1.5 py-0.5 rounded font-extrabold">광고주 모집</span>
+        <span class="text-[8px] bg-amber-400 text-slate-900 px-1 py-0.2 rounded font-extrabold">광고주 모집</span>
       </div>
     </div>
 
-    <!-- 유용한 계산기 툴바 -->
-    <section class="px-2.5 mb-2">
-      <div class="bg-indigo-50/70 border border-indigo-100 rounded-xl p-2">
+    <!-- 스마트 계산기 툴바 -->
+    <section class="px-2 mb-1.5">
+      <div class="bg-indigo-50/70 border border-indigo-100 rounded-lg p-1.5">
         <div class="flex justify-between items-center mb-1">
-          <span class="text-[10px] font-bold text-indigo-950 flex items-center gap-1">
+          <span class="text-[9px] font-bold text-indigo-950 flex items-center gap-1">
             <i class="fa-solid fa-calculator text-indigo-600"></i> 부동산 스마트 계산기
           </span>
-          <span class="text-[8px] text-indigo-500 font-medium">실생활 필수 유틸리티</span>
+          <span class="text-[8px] text-indigo-500">실생활 필수 유틸리티</span>
         </div>
         <div class="grid grid-cols-3 gap-1">
-          <button onclick="toggleCalcModal('brokerage')" class="bg-white border border-indigo-100 text-indigo-900 py-1 px-1 rounded-lg text-[9px] font-semibold flex items-center justify-center gap-1 shadow-sm">
-            <i class="fa-solid fa-handshake text-indigo-500"></i> 복비 계산기
+          <button onclick="toggleCalcModal('brokerage')" class="bg-white border border-indigo-100 text-indigo-900 py-0.5 px-1 rounded text-[9px] font-semibold flex items-center justify-center gap-1">
+            <i class="fa-solid fa-handshake text-indigo-500"></i> 복비 계산
           </button>
-          <button onclick="toggleCalcModal('loan')" class="bg-white border border-indigo-100 text-indigo-900 py-1 px-1 rounded-lg text-[9px] font-semibold flex items-center justify-center gap-1 shadow-sm">
+          <button onclick="toggleCalcModal('loan')" class="bg-white border border-indigo-100 text-indigo-900 py-0.5 px-1 rounded text-[9px] font-semibold flex items-center justify-center gap-1">
             <i class="fa-solid fa-percent text-indigo-500"></i> 대출 이자
           </button>
-          <button onclick="toggleCalcModal('area')" class="bg-white border border-indigo-100 text-indigo-900 py-1 px-1 rounded-lg text-[9px] font-semibold flex items-center justify-center gap-1 shadow-sm">
-            <i class="fa-solid fa-ruler-combined text-indigo-500"></i> 평형 변환기
+          <button onclick="toggleCalcModal('area')" class="bg-white border border-indigo-100 text-indigo-900 py-0.5 px-1 rounded text-[9px] font-semibold flex items-center justify-center gap-1">
+            <i class="fa-solid fa-ruler-combined text-indigo-500"></i> 평형 변환
           </button>
         </div>
       </div>
     </section>
 
     <!-- Filter Toolbar -->
-    <section class="px-2.5 mb-1.5">
-      <div class="flex items-center justify-between gap-1.5">
+    <section class="px-2 mb-1">
+      <div class="flex items-center justify-between gap-1">
         <div class="flex gap-1 overflow-x-auto no-scrollbar" id="regionTabs">
-          <button onclick="setRegionFilter('전체')" class="region-btn px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-indigo-600 text-white">전체</button>
-          <button onclick="setRegionFilter('서울')" class="region-btn px-2 py-0.5 rounded-lg text-[11px] font-medium bg-white text-slate-600 border border-slate-200">서울</button>
-          <button onclick="setRegionFilter('경기')" class="region-btn px-2 py-0.5 rounded-lg text-[11px] font-medium bg-white text-slate-600 border border-slate-200">경기</button>
-          <button onclick="setRegionFilter('기타')" class="region-btn px-2 py-0.5 rounded-lg text-[11px] font-medium bg-white text-slate-600 border border-slate-200">기타</button>
+          <button onclick="setRegionFilter('전체')" class="region-btn px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-600 text-white">전체</button>
+          <button onclick="setRegionFilter('서울')" class="region-btn px-2 py-0.5 rounded text-[10px] font-medium bg-white text-slate-600 border border-slate-200">서울</button>
+          <button onclick="setRegionFilter('경기')" class="region-btn px-2 py-0.5 rounded text-[10px] font-medium bg-white text-slate-600 border border-slate-200">경기</button>
+          <button onclick="setRegionFilter('기타')" class="region-btn px-2 py-0.5 rounded text-[10px] font-medium bg-white text-slate-600 border border-slate-200">기타</button>
         </div>
-        <select id="sortOption" onchange="renderCards()" class="bg-white text-[10px] border border-slate-200 rounded-lg px-1.5 py-0.5 font-medium text-slate-600 focus:outline-none">
+        <select id="sortOption" onchange="renderCards()" class="bg-white text-[9px] border border-slate-200 rounded px-1 py-0.5 font-medium text-slate-600 focus:outline-none">
           <option value="pinned">고정순</option>
           <option value="name">이름순</option>
           <option value="priceHigh">가격순</option>
@@ -136,11 +135,11 @@
       </div>
     </section>
 
-    <!-- Card Grid List (정확히 4개 카드 노출에 최적화된 스크롤 영역) -->
-    <main class="px-2.5">
-      <div class="text-[9px] text-slate-400 mb-1 flex justify-between items-center">
+    <!-- Card Grid List (4개 카드 한눈에 100% 완전 노출 스크롤 존) -->
+    <main class="px-2">
+      <div class="text-[8px] text-slate-400 mb-0.5 flex justify-between items-center">
         <span>* 📌 핀 고정 최대 2개 지원</span>
-        <span>4개 고정 노출 / 스크롤 가능 ↓</span>
+        <span>4개 단지 한눈에 노출 (스크롤 가능 ↓)</span>
       </div>
       <div id="cardContainer" class="card-scroll-area space-y-1.5 pr-0.5">
         <!-- Dynamic Cards Render Here -->
@@ -148,221 +147,212 @@
     </main>
 
     <!-- 광고 배너 2 -->
-    <div class="px-2.5 mt-2">
-      <div class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 rounded-xl px-2.5 py-1.5 text-white shadow-sm flex items-center justify-between">
-        <div class="flex items-center gap-1.5">
-          <div class="w-5 h-5 rounded bg-white text-amber-600 flex items-center justify-center font-bold text-[10px]">
-            <i class="fa-solid fa-bullhorn"></i>
-          </div>
-          <div>
-            <p class="text-[10px] font-bold">부동산 분양 & 상가 입점 스폰서</p>
-          </div>
+    <div class="px-2 mt-1.5">
+      <div class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 rounded-lg px-2 py-1 text-white shadow-sm flex items-center justify-between">
+        <div class="flex items-center gap-1">
+          <i class="fa-solid fa-bullhorn text-[10px]"></i>
+          <span class="text-[9px] font-bold">부동산 분양 & 상가 입점 스폰서</span>
         </div>
-        <span class="text-[8px] bg-slate-900 text-white px-1.5 py-0.5 rounded font-extrabold">광고주 모집</span>
+        <span class="text-[8px] bg-slate-900 text-white px-1 py-0.2 rounded font-extrabold">광고주 모집</span>
       </div>
     </div>
   </div>
 
   <!-- Footer -->
-  <footer class="mt-1 py-2 px-3 text-center text-[9px] text-slate-400 border-t border-slate-200 bg-white space-y-0.5">
+  <footer class="py-1.5 px-2 text-center text-[8px] text-slate-400 border-t border-slate-200 bg-white space-y-0.5">
     <div class="flex items-center justify-center gap-1">
       <span id="footerT9" onclick="promptAdminPassword()" class="font-bold text-indigo-600 cursor-pointer hover:underline bg-indigo-50 px-1 py-0.2 rounded border border-indigo-100">T9</span>
-      <span class="font-bold text-slate-700">tol9u 부동산 시세 레이더 v9.0</span>
+      <span class="font-bold text-slate-700">tol9u 부동산 시세 레이더 v10.0</span>
     </div>
     <p>© 2026 tol9u. All rights reserved. | 문의: <a href="mailto:dotol9u@gmail.com" class="underline">dotol9u@gmail.com</a></p>
-    <p class="text-[8px] text-slate-400 leading-tight">
-      본 콘텐츠 및 데이터베이스 구조는 저작권법의 보호를 받으며 무단 복제 및 재배포를 금합니다.
-    </p>
   </footer>
 
   <!-- Modal: 상세 드로어 -->
-  <div id="detailDrawer" class="fixed inset-0 z-40 hidden bg-black/40 backdrop-blur-sm flex justify-end flex-col">
-    <div class="bg-white rounded-t-3xl p-4 max-h-[80vh] overflow-y-auto shadow-2xl">
-      <div class="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-3"></div>
+  <div id="detailDrawer" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex justify-end flex-col">
+    <div class="bg-white rounded-t-2xl p-3.5 max-h-[80vh] overflow-y-auto shadow-2xl">
+      <div class="w-8 h-1 bg-slate-300 rounded-full mx-auto mb-2"></div>
       <div class="flex justify-between items-start mb-2">
         <div>
-          <span id="drawerRegion" class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">서울</span>
-          <h2 id="drawerTitle" class="text-lg font-bold text-slate-800 mt-0.5">단지명</h2>
+          <span id="drawerRegion" class="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.2 rounded font-medium">서울</span>
+          <h2 id="drawerTitle" class="text-base font-bold text-slate-800 mt-0.5">단지명</h2>
         </div>
-        <button onclick="closeDrawer()" class="text-slate-400 text-base"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="closeDrawer()" class="text-slate-400 text-sm"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded-xl mb-3 border border-slate-100">
+      <div class="grid grid-cols-2 gap-1.5 bg-slate-50 p-2 rounded-xl mb-2.5 border border-slate-100">
         <div>
-          <p class="text-[10px] text-slate-400">최근 실거래가</p>
-          <p id="drawerRealPrice" class="text-sm font-bold text-slate-800">- 만원</p>
+          <p class="text-[9px] text-slate-400">최근 실거래가</p>
+          <p id="drawerRealPrice" class="text-xs font-bold text-slate-800">- 만원</p>
         </div>
         <div>
-          <p class="text-[10px] text-slate-400">최저 네이버 호가</p>
-          <p id="drawerAskPrice" class="text-sm font-bold text-indigo-600">- 만원</p>
+          <p class="text-[9px] text-slate-400">최저 네이버 호가</p>
+          <p id="drawerAskPrice" class="text-xs font-bold text-indigo-600">- 만원</p>
         </div>
       </div>
-      <div class="mb-3">
-        <h3 class="text-[11px] font-bold text-slate-500 mb-1.5"><i class="fa-solid fa-chart-line"></i> 최근 8주 시세 추이</h3>
-        <div class="h-36 w-full bg-slate-50 p-2 rounded-xl border border-slate-100">
+      <div class="mb-2.5">
+        <h3 class="text-[10px] font-bold text-slate-500 mb-1"><i class="fa-solid fa-chart-line"></i> 최근 8주 시세 추이</h3>
+        <div class="h-32 w-full bg-slate-50 p-1.5 rounded-xl border border-slate-100">
           <canvas id="drawerChart"></canvas>
         </div>
       </div>
-      <div class="space-y-2 mb-3">
-        <div class="bg-emerald-50 border border-emerald-100 p-2.5 rounded-xl">
-          <h4 class="text-[11px] font-bold text-emerald-800 mb-0.5"><i class="fa-solid fa-circle-up"></i> 상승 여력 및 호재</h4>
-          <p id="drawerUpside" class="text-[11px] text-emerald-900 leading-relaxed"></p>
+      <div class="space-y-1.5 mb-2">
+        <div class="bg-emerald-50 border border-emerald-100 p-2 rounded-xl">
+          <h4 class="text-[10px] font-bold text-emerald-800 mb-0.5"><i class="fa-solid fa-circle-up"></i> 상승 여력 및 호재</h4>
+          <p id="drawerUpside" class="text-[10px] text-emerald-900 leading-relaxed"></p>
         </div>
-        <div class="bg-rose-50 border border-rose-100 p-2.5 rounded-xl">
-          <h4 class="text-[11px] font-bold text-rose-800 mb-0.5"><i class="fa-solid fa-triangle-exclamation"></i> 주의 리스크</h4>
-          <p id="drawerRisk" class="text-[11px] text-rose-900 leading-relaxed"></p>
+        <div class="bg-rose-50 border border-rose-100 p-2 rounded-xl">
+          <h4 class="text-[10px] font-bold text-rose-800 mb-0.5"><i class="fa-solid fa-triangle-exclamation"></i> 주의 리스크</h4>
+          <p id="drawerRisk" class="text-[10px] text-rose-900 leading-relaxed"></p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal: 단지 추가 (지역명 & 단지명 완벽 자동완성) -->
-  <div id="addModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl w-full max-w-xs p-4 shadow-2xl relative">
-      <h3 class="text-sm font-bold text-slate-800 mb-2">신규 관심 단지 추가</h3>
+  <!-- Modal: 단지 추가 (자동완성 강화) -->
+  <div id="addModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-3">
+    <div class="bg-white rounded-2xl w-full max-w-xs p-3.5 shadow-2xl relative">
+      <h3 class="text-xs font-bold text-slate-800 mb-1.5">신규 관심 단지 추가</h3>
       
-      <!-- 자동완성 검색창 (지역 및 단지명 통합) -->
+      <!-- 자동완성 검색창 -->
       <div class="relative mb-2">
-        <label class="block text-[10px] font-medium text-slate-500 mb-0.5">지역명 또는 단지명 입력 (자동완성)</label>
+        <label class="block text-[9px] font-medium text-slate-500 mb-0.5">지역명 또는 아파트명 (실시간 예측검색)</label>
         <input type="text" id="modalSearchName" oninput="onModalSearchInput(this.value)" placeholder="예: 서울, 송파, 반포자이, 엘시티..." 
-          class="w-full px-2.5 py-1.5 text-xs bg-slate-100 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        <ul id="autoCompleteList" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-40 overflow-y-auto hidden z-20"></ul>
+          class="w-full px-2 py-1 text-xs bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <ul id="autoCompleteList" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-36 overflow-y-auto hidden z-50"></ul>
       </div>
 
-      <form id="addApartForm" onsubmit="handleAddApart(event)" class="space-y-2">
-        <div class="grid grid-cols-2 gap-2">
+      <form id="addApartForm" onsubmit="handleAddApart(event)" class="space-y-1.5">
+        <div class="grid grid-cols-2 gap-1.5">
           <div>
-            <label class="block text-[10px] font-medium text-slate-500">지역</label>
-            <input type="text" id="modalRegion" required class="w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+            <label class="block text-[9px] font-medium text-slate-500">지역</label>
+            <input type="text" id="modalRegion" required class="w-full px-2 py-0.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
           </div>
           <div>
-            <label class="block text-[10px] font-medium text-slate-500">평형</label>
-            <input type="text" id="modalType" required class="w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg">
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-[10px] font-medium text-slate-500">실거래가 (만원)</label>
-            <input type="number" id="modalRealPrice" required class="w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg">
-          </div>
-          <div>
-            <label class="block text-[10px] font-medium text-slate-500">최저 호가 (만원)</label>
-            <input type="number" id="modalAskPrice" required class="w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+            <label class="block text-[9px] font-medium text-slate-500">평형</label>
+            <input type="text" id="modalType" required class="w-full px-2 py-0.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
           </div>
         </div>
-        <div>
-          <label class="block text-[10px] font-medium text-slate-500">주요 호재</label>
-          <input type="text" id="modalUpside" class="w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+        <div class="grid grid-cols-2 gap-1.5">
+          <div>
+            <label class="block text-[9px] font-medium text-slate-500">실거래가 (만원)</label>
+            <input type="number" id="modalRealPrice" required class="w-full px-2 py-0.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+          </div>
+          <div>
+            <label class="block text-[9px] font-medium text-slate-500">최저 호가 (만원)</label>
+            <input type="number" id="modalAskPrice" required class="w-full px-2 py-0.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+          </div>
         </div>
         <div>
-          <label class="block text-[10px] font-medium text-slate-500">리스크 요인</label>
-          <input type="text" id="modalRisk" class="w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+          <label class="block text-[9px] font-medium text-slate-500">주요 호재</label>
+          <input type="text" id="modalUpside" class="w-full px-2 py-0.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
         </div>
-        <div class="flex gap-1.5 pt-1">
-          <button type="button" onclick="closeAddModal()" class="w-1/2 py-1.5 text-xs bg-slate-100 font-medium text-slate-600 rounded-xl">취소</button>
-          <button type="submit" class="w-1/2 py-1.5 text-xs bg-indigo-600 font-medium text-white rounded-xl shadow">등록</button>
+        <div>
+          <label class="block text-[9px] font-medium text-slate-500">리스크 요인</label>
+          <input type="text" id="modalRisk" class="w-full px-2 py-0.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+        </div>
+        <div class="flex gap-1 pt-1">
+          <button type="button" onclick="closeAddModal()" class="w-1/2 py-1 text-xs bg-slate-100 font-medium text-slate-600 rounded-lg">취소</button>
+          <button type="submit" class="w-1/2 py-1 text-xs bg-indigo-600 font-medium text-white rounded-lg shadow">등록</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Modal: [50개 이상 탑재] 부동산 & 법률 상식 백과 -->
+  <!-- Modal: [소분류 탭 안 잘리게 완벽 교정된] 부동산 & 법률 상식 백과 (52개) -->
   <div id="knowledgeModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-3">
-    <div class="bg-white rounded-2xl w-full max-w-sm p-3.5 shadow-2xl max-h-[82vh] flex flex-col">
-      <div class="flex justify-between items-center pb-2 border-b border-slate-100">
-        <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
-          <i class="fa-solid fa-scale-balanced text-indigo-600"></i> 부동산 & 법률 백과 (50+)
+    <div class="bg-white rounded-2xl w-full max-w-sm p-3 shadow-2xl max-h-[82vh] flex flex-col">
+      <div class="flex justify-between items-center pb-1.5 border-b border-slate-100">
+        <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1">
+          <i class="fa-solid fa-scale-balanced text-indigo-600"></i> 부동산 & 법률 백과 (52)
         </h3>
-        <button onclick="toggleKnowledgeModal()" class="text-slate-400 text-base"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="toggleKnowledgeModal()" class="text-slate-400 text-sm"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
-      <!-- 상식 카테고리 필터 탭 -->
-      <div class="flex gap-1 my-2 overflow-x-auto no-scrollbar py-1">
-        <button onclick="filterKnowledge('all')" class="know-cat-btn px-2 py-1 rounded-lg text-[10px] font-bold bg-indigo-600 text-white">전체(52)</button>
-        <button onclick="filterKnowledge('law')" class="know-cat-btn px-2 py-1 rounded-lg text-[10px] font-medium bg-slate-100 text-slate-600">법률/임대차</button>
-        <button onclick="filterKnowledge('tax')" class="know-cat-btn px-2 py-1 rounded-lg text-[10px] font-medium bg-slate-100 text-slate-600">세금/절세</button>
-        <button onclick="filterKnowledge('finance')" class="know-cat-btn px-2 py-1 rounded-lg text-[10px] font-medium bg-slate-100 text-slate-600">대출/금융</button>
-        <button onclick="filterKnowledge('sub')" class="know-cat-btn px-2 py-1 rounded-lg text-[10px] font-medium bg-slate-100 text-slate-600">청약/분양</button>
+      <!-- 소분류 탭: shrink-0 추가로 절대 잘리지 않게 완전 보장 -->
+      <div class="flex gap-1 my-2 overflow-x-auto no-scrollbar py-0.5 border-b border-slate-100">
+        <button onclick="filterKnowledge('all', this)" class="know-cat-btn shrink-0 px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-600 text-white">전체(52)</button>
+        <button onclick="filterKnowledge('law', this)" class="know-cat-btn shrink-0 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">법률/임대차</button>
+        <button onclick="filterKnowledge('tax', this)" class="know-cat-btn shrink-0 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">세금/절세</button>
+        <button onclick="filterKnowledge('finance', this)" class="know-cat-btn shrink-0 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">대출/금융</button>
+        <button onclick="filterKnowledge('sub', this)" class="know-cat-btn shrink-0 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">청약/분양</button>
       </div>
 
       <!-- 상식 리스트 스크롤 영역 -->
-      <div id="knowledgeListContainer" class="space-y-2 overflow-y-auto pr-1 flex-1 text-xs">
-        <!-- JS로 52개 항목 동적 생성 -->
-      </div>
+      <div id="knowledgeListContainer" class="space-y-1.5 overflow-y-auto pr-1 flex-1 text-xs"></div>
     </div>
   </div>
 
   <!-- Modal: 스마트 계산기 -->
-  <div id="calcModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl w-full max-w-xs p-4 shadow-2xl">
-      <div class="flex justify-between items-center mb-3">
-        <h3 id="calcModalTitle" class="text-sm font-bold text-slate-800">부동산 계산기</h3>
+  <div id="calcModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-3">
+    <div class="bg-white rounded-2xl w-full max-w-xs p-3 shadow-2xl">
+      <div class="flex justify-between items-center mb-2">
+        <h3 id="calcModalTitle" class="text-xs font-bold text-slate-800">부동산 계산기</h3>
         <button onclick="toggleCalcModal()" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div id="calcBrokerage" class="calc-content space-y-2 text-xs">
+      <div id="calcBrokerage" class="calc-content space-y-1.5 text-xs">
         <div>
-          <label class="block text-[10px] text-slate-500 mb-0.5">거래 금액 (만원)</label>
-          <input type="number" id="brokerPrice" placeholder="예: 80000 (8억원)" class="w-full px-2 py-1 border rounded-lg">
+          <label class="block text-[9px] text-slate-500 mb-0.5">거래 금액 (만원)</label>
+          <input type="number" id="brokerPrice" placeholder="예: 80000 (8억원)" class="w-full px-2 py-0.5 border rounded-lg text-xs">
         </div>
         <div>
-          <label class="block text-[10px] text-slate-500 mb-0.5">거래 유형</label>
-          <select id="brokerType" class="w-full px-2 py-1 border rounded-lg">
+          <label class="block text-[9px] text-slate-500 mb-0.5">거래 유형</label>
+          <select id="brokerType" class="w-full px-2 py-0.5 border rounded-lg text-xs">
             <option value="buy">매매/교환</option>
             <option value="rent">전세/임대차</option>
           </select>
         </div>
-        <button onclick="calcBrokerage()" class="w-full py-1.5 bg-indigo-600 text-white font-bold rounded-lg mt-1">계산하기</button>
-        <div id="brokerResult" class="p-2 bg-slate-50 rounded-lg text-slate-700 font-bold hidden text-center"></div>
+        <button onclick="calcBrokerage()" class="w-full py-1 bg-indigo-600 text-white font-bold rounded-lg text-xs">계산하기</button>
+        <div id="brokerResult" class="p-1.5 bg-slate-50 rounded-lg text-slate-700 font-bold hidden text-center text-[10px]"></div>
       </div>
-      <div id="calcLoan" class="calc-content space-y-2 text-xs hidden">
+      <div id="calcLoan" class="calc-content space-y-1.5 text-xs hidden">
         <div>
-          <label class="block text-[10px] text-slate-500 mb-0.5">대출 원금 (만원)</label>
-          <input type="number" id="loanPrincipal" placeholder="예: 30000 (3억원)" class="w-full px-2 py-1 border rounded-lg">
+          <label class="block text-[9px] text-slate-500 mb-0.5">대출 원금 (만원)</label>
+          <input type="number" id="loanPrincipal" placeholder="예: 30000 (3억원)" class="w-full px-2 py-0.5 border rounded-lg text-xs">
         </div>
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-2 gap-1.5">
           <div>
-            <label class="block text-[10px] text-slate-500 mb-0.5">연이율 (%)</label>
-            <input type="number" id="loanRate" step="0.1" placeholder="4.5" class="w-full px-2 py-1 border rounded-lg">
+            <label class="block text-[9px] text-slate-500 mb-0.5">연이율 (%)</label>
+            <input type="number" id="loanRate" step="0.1" placeholder="4.5" class="w-full px-2 py-0.5 border rounded-lg text-xs">
           </div>
           <div>
-            <label class="block text-[10px] text-slate-500 mb-0.5">기간 (년)</label>
-            <input type="number" id="loanYears" placeholder="30" class="w-full px-2 py-1 border rounded-lg">
+            <label class="block text-[9px] text-slate-500 mb-0.5">기간 (년)</label>
+            <input type="number" id="loanYears" placeholder="30" class="w-full px-2 py-0.5 border rounded-lg text-xs">
           </div>
         </div>
-        <button onclick="calcLoan()" class="w-full py-1.5 bg-indigo-600 text-white font-bold rounded-lg mt-1">계산하기</button>
-        <div id="loanResult" class="p-2 bg-slate-50 rounded-lg text-slate-700 font-bold hidden text-center"></div>
+        <button onclick="calcLoan()" class="w-full py-1 bg-indigo-600 text-white font-bold rounded-lg text-xs">계산하기</button>
+        <div id="loanResult" class="p-1.5 bg-slate-50 rounded-lg text-slate-700 font-bold hidden text-center text-[10px]"></div>
       </div>
-      <div id="calcArea" class="calc-content space-y-2 text-xs hidden">
+      <div id="calcArea" class="calc-content space-y-1.5 text-xs hidden">
         <div>
-          <label class="block text-[10px] text-slate-500 mb-0.5">전용면적 (㎡)</label>
-          <input type="number" id="areaSqM" placeholder="예: 84" oninput="calcArea(this.value)" class="w-full px-2 py-1 border rounded-lg">
+          <label class="block text-[9px] text-slate-500 mb-0.5">전용면적 (㎡)</label>
+          <input type="number" id="areaSqM" placeholder="예: 84" oninput="calcArea(this.value)" class="w-full px-2 py-0.5 border rounded-lg text-xs">
         </div>
-        <div class="p-3 bg-indigo-50 rounded-xl text-center">
-          <p class="text-[10px] text-slate-500">평수 환산 결과</p>
-          <p id="areaResult" class="text-base font-extrabold text-indigo-700 mt-0.5">0 평</p>
+        <div class="p-2 bg-indigo-50 rounded-xl text-center">
+          <p class="text-[9px] text-slate-500">평수 환산 결과</p>
+          <p id="areaResult" class="text-sm font-extrabold text-indigo-700">0 평</p>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Modal: 관리자 패널 -->
-  <div id="adminModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl w-full max-w-xs p-4 shadow-2xl">
+  <div id="adminModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-3">
+    <div class="bg-white rounded-2xl w-full max-w-xs p-3.5 shadow-2xl">
       <div class="flex justify-between items-center mb-2">
-        <h3 class="text-sm font-bold text-slate-800"><i class="fa-solid fa-user-shield text-indigo-600"></i> 관리자 패널</h3>
+        <h3 class="text-xs font-bold text-slate-800"><i class="fa-solid fa-user-shield text-indigo-600"></i> 관리자 패널</h3>
         <button onclick="closeAdminModal()" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="space-y-3 text-xs">
-        <div class="p-2 bg-indigo-50 rounded-lg border border-indigo-100">
-          <p class="font-bold text-indigo-900 mb-0.5">시스템 권한 인증됨</p>
-          <p class="text-[10px] text-indigo-700">localStorage KEY: re-radar-v5</p>
+      <div class="space-y-2 text-xs">
+        <div class="p-1.5 bg-indigo-50 rounded-lg border border-indigo-100">
+          <p class="font-bold text-indigo-900 text-[10px]">시스템 권한 인증됨</p>
+          <p class="text-[9px] text-indigo-700">localStorage KEY: re-radar-v5</p>
         </div>
         <div class="pt-1 border-t border-slate-100">
-          <label class="block text-[10px] font-bold text-slate-600 mb-1">관리자 암호 변경</label>
-          <input type="password" id="newAdminPassword" placeholder="새 암호 입력..." class="w-full px-2 py-1 border rounded-lg mb-1">
-          <button onclick="changeAdminPassword()" class="w-full py-1 bg-indigo-600 text-white rounded-lg font-bold">암호 변경 저장</button>
+          <label class="block text-[9px] font-bold text-slate-600 mb-0.5">관리자 암호 변경</label>
+          <input type="password" id="newAdminPassword" placeholder="새 암호 입력..." class="w-full px-2 py-0.5 border rounded-lg text-xs mb-1">
+          <button onclick="changeAdminPassword()" class="w-full py-0.5 bg-indigo-600 text-white rounded-lg font-bold text-xs">암호 변경 저장</button>
         </div>
         <div class="pt-1 border-t border-slate-100">
-          <button onclick="resetToDefaultData()" class="w-full py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl font-bold">
+          <button onclick="resetToDefaultData()" class="w-full py-1.5 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl font-bold text-xs">
             데이터 전체 초기화
           </button>
         </div>
@@ -371,7 +361,7 @@
   </div>
 
   <script>
-    // --- 전국 아파트 DB ---
+    // --- 전국 아파트 데이터베이스 ---
     const NATIONAL_REAL_ESTATE_DB = [
       { id: "apt-1", name: "반포자이", region: "서울", district: "서초구", pinned: true, types: [{ name: "84A", realPrice: 360000, askPrice: 365000, history: [345000, 350000, 355000, 360000] }], upside: "반포 재건축 이주 수요 흡수, 학군 최상위", risk: "보유세 부담 지속" },
       { id: "apt-2", name: "헬리오시티", region: "서울", district: "송파구", pinned: true, types: [{ name: "84A", realPrice: 215000, askPrice: 218000, history: [200000, 205000, 210000, 215000] }], upside: "9,510세대 대단지, 위례신사선 추진 호재", risk: "송파/강동 공급물량 변동성" },
@@ -383,7 +373,7 @@
       { id: "apt-8", name: "범어센트럴푸르지오", region: "기타", district: "대구 수성구", pinned: false, types: [{ name: "84A", realPrice: 102000, askPrice: 105000, history: [95000, 98000, 100000, 102000] }], upside: "대구 수성구 핵심 학군지", risk: "대구 미분양 적체 부담" }
     ];
 
-    // --- 52개 확장 부동산/법률 상식 데이터베이스 ---
+    // --- 52개 전체 부동산/법률 상식 백과 ---
     const KNOWLEDGE_DB = [
       { id: 1, cat: "finance", title: "LTV (주택담보대출비율)", desc: "집값 대비 대출 가능 한도 비율. 규제지역 및 다주택 여부에 따라 상이하게 적용됨." },
       { id: 2, cat: "finance", title: "DSR (총부채원리금상환비율)", desc: "모든 대출의 연간 원리금 상환액을 연소득으로 나눈 비율. 현재 40% 제한 적용." },
@@ -405,7 +395,7 @@
       { id: 18, cat: "sub", title: "전매제한 및 실거주 의무", desc: "수도권 분양가상한제 적용 단지 청약 당첨 시 일정 기간 매도 및 거주 의무 부여." },
       { id: 19, cat: "tax", title: "종합부동산세(종부세) 과세표준", desc: "공시가격 합산액에서 기본공제(1주택자 12억원)를 차감한 금액에 공정시장가액비율 곱함." },
       { id: 20, cat: "tax", title: "양도소득세 장기보유특별공제", desc: "1세대 1주택자는 보유기간(최대 40%) + 거주기간(최대 40%) 합산 최대 80% 공제." },
-      { id: 21, cat: "law", title: "가계약금의 법적 효력", desc: "목적물, 매매대금, 잔금일 등이 특정되어 전달된 가계약금은 해시 시 법적 위약금 효력 발생." },
+      { id: 21, cat: "law", title: "가계약금의 법적 효력", desc: "목적물, 매매대금, 잔금일 등이 특정되어 전달된 가계약금은 해제 시 법적 위약금 효력 발생." },
       { id: 22, cat: "law", title: "부동산 중개보수 지급 시기", desc: "개업공인중개사와의 별도 약정이 없으면 원칙적으로 중개대상물의 거래가 완료된 날 지급." },
       { id: 23, cat: "law", title: "원상복구 의무 범위", desc: "통상적인 세월의 흐름에 따른 자연 마모는 임차인의 원상복구 의무 대상에서 제외됨." },
       { id: 24, cat: "finance", title: "특례보금자리론 / 디딤돌 대출", desc: "무주택자 및 서민을 위해 저금리로 장기 고정금리를 제공하는 정책금융 상품." },
@@ -420,23 +410,23 @@
       { id: 33, cat: "sub", title: "재개발 vs 재건축 차이", desc: "재개발: 정비기반시설 열악한 지역 전체 정비 / 재건축: 기반시설은 양호하나 노후 공동주택 정비." },
       { id: 34, cat: "sub", title: "조합원 지위양도 제한", desc: "투기과열지구 내 재건축(조합설립인가 후), 재개발(관리처분인가 후) 지위양도 제한." },
       { id: 35, cat: "finance", title: "전세자금대출 보증기관 종류", desc: "HF(한국주택금융공사), HUG(주택도시보증공사), SGI(서울보증)별 한도 및 요건 상이." },
-      { id: 36, cat: "tax", title: "자급출처조사 (자금조달계획서)", desc: "투기과열지구 및 조정대상지역 내 주택 취득 시 자금출처 증빙서류 제출 필수." },
+      { id: 36, cat: "tax", title: "자금출처조사 (자금조달계획서)", desc: "투기과열지구 및 조정대상지역 내 주택 취득 시 자금출처 증빙서류 제출 필수." },
       { id: 37, cat: "law", title: "대리인 계약 시 필수 서류", desc: "위임장, 인감증명서(본인발급), 위임인 신분증 사본 및 인감도장 일치 여부 확인." },
-      { id: 38, cat: "law", title: "부동산 신탁 등기 주의사항", desc: "신탁회사 소유 건물은 신탁회사의 동의서 없이 수탁자(원소유자)와 계약 시 무효." },
-      { id: 39, cat: "law", title: "매도인 하자담보책임", desc: "매매 후 누수 등 누락된 누수/균열 하자에 대해 안 날로부터 6개월 이내 손해배상 청구 가능." },
-      { id: 40, cat: "sub", title: "분양권 vs 입주권 차이", desc: "분양권: 청약 당첨된 권리 / 입주권: 재개발·재건축 조합원이 새 집을 받을 수 있는 권리." },
-      { id: 41, cat: "sub", title: "추첨제 및 가점제 비율", desc: "전용 85㎡ 이하 및 초과, 규제지역 여부에 따라 청약 당첨 추첨 비율이 다르게 배정됨." },
+      { id: 38, cat: "law", title: "부동산 신탁 등기 주의사항", desc: "신탁회사 소유 건물은 신탁회사 동의서 없이 수탁자(원소유자)와 계약 시 무효." },
+      { id: 39, cat: "law", title: "매도인 하자담보책임", desc: "매매 후 누수 등 숨은 하자에 대해 안 날로부터 6개월 이내 손해배상 청구 가능." },
+      { id: 40, cat: "sub", title: "분양권 vs 입주권 차이", desc: "분양권: 청약 당첨 권리 / 입주권: 재개발·재건축 조합원이 새 집을 받을 수 있는 권리." },
+      { id: 41, cat: "sub", title: "추첨제 및 가점제 비율", desc: "전용 85㎡ 이하 및 초과, 규제지역 여부에 따라 청약 당첨 추첨 비율 다르게 배정." },
       { id: 42, cat: "tax", title: "취득세 감면 혜택 (생애최초)", desc: "생애최초 주택 구입 시 실거래가 12억원 이하 주택에 대해 최대 200만원 취득세 감면." },
       { id: 43, cat: "law", title: "확정일자 인터넷 신청법", desc: "대법원 인터넷등기소 또는 주민센터 방문을 통해 24시간 확정일자 부여 신청 가능." },
       { id: 44, cat: "law", title: "임대사업자 등록 혜택과 의무", desc: "임대료 증액 5% 제한 및 장기 임대 의무 부담 대신 세제 감면 혜택 제공." },
-      { id: 45, cat: "finance", title: "중도금 대출 무이자 vs 이자후불제", desc: "무이자: 시공사가 이자 부담 / 이자후불제: 잔금 시점에 적치된 이자를 한꺼번에 상환." },
-      { id: 46, cat: "law", title: "생활숙박시설(생숙) 주거 용도 변경", desc: "생숙의 주거용 사용 제한 규제에 따라 오피스텔 전환 또는 이행강제금 부과 이슈 사전 점검." },
+      { id: 45, cat: "finance", title: "중도금 대출 무이자 vs 이자후불제", desc: "무이자: 시공사 이자 부담 / 이자후불제: 잔금 시점에 적치된 이자를 한꺼번에 상환." },
+      { id: 46, cat: "law", title: "생활숙박시설(생숙) 주거 용도 변경", desc: "생숙 주거용 사용 제한 규제에 따라 오피스텔 전환 또는 이행강제금 부과 이슈 점검." },
       { id: 47, cat: "law", title: "가등기 및 가처분 등기 건 위험성", desc: "등기부등본에 소유권이전청구권가등기나 처분금지가처분이 있으면 계약 금지." },
       { id: 48, cat: "law", title: "전세권 설정 등기 장점", desc: "전입신고와 별개로 등기부에 직접 채권 등기하여 경매 직접 신청 권한 보유." },
-      { id: 49, cat: "tax", title: "부동산 증여 시 이월과세 규정", desc: "배우자/직계존비속에게 증여받은 자산을 10년 이내 양도 시 수증자가 아닌 증여자의 취득가액 기준 양도세 계산." },
+      { id: 49, cat: "tax", title: "부동산 증여 시 이월과세 규정", desc: "배우자/직계존비속 증여 자산을 10년 이내 양도 시 증여자의 취득가액 기준 양도세 계산." },
       { id: 50, cat: "law", title: "공인중개사 책임 보증보험 한도", desc: "중개사고 발생 시 공제사업자가 보상하는 한도 (개인 2억원, 법인 4억원 이상)." },
-      { id: 51, cat: "law", title: "상가 임대차 계약갱신요구권 (10년)", desc: "상가 임차인은 최초 임대차 기간을 포함한 10년의 범위 내에서 계약갱신 요구 가능." },
-      { id: 52, cat: "finance", title: "브릿지론(Bridge Loan)과 본PF", desc: "부동산 개발 초기 토지 매입용 단기 대출(브릿지론) 후 인허가 완료 시 본PF로 전환." }
+      { id: 51, cat: "law", title: "상가 임대차 계약갱신요구권 (10년)", desc: "상가 임차인은 최초 임대차 기간을 포함한 10년 범위 내에서 계약갱신 요구 가능." },
+      { id: 52, cat: "finance", title: "브릿지론(Bridge Loan)과 본PF", desc: "부동산 개발 초기 토지 매입용 단기 대출(브릿지론) 후 인허가 완료 시 본PF 전환." }
     ];
 
     const STORAGE_KEY = 're-radar-v5';
@@ -506,13 +496,13 @@
       document.getElementById('kpiDown').innerText = down;
     }
 
-    // --- 중복 검증 및 카드 4개 노출 정렬 ---
+    // --- 정확한 4개 카드 한눈에 노출 렌더링 ---
     function renderCards() {
       const container = document.getElementById('cardContainer');
       const searchKeyword = document.getElementById('searchInput').value.trim().toLowerCase();
       const sortOption = document.getElementById('sortOption').value;
 
-      // 이름 및 ID 기준 완전 중복 제거
+      // 단지 중복 방지
       let uniqueList = [];
       const map = new Map();
       for (const item of appData) {
@@ -552,30 +542,29 @@
         const isUp = diff >= 0;
 
         return `
-          <div class="bg-white rounded-xl p-2.5 border border-slate-100 shadow-sm relative ${item.pinned ? 'pinned-card' : ''}">
-            <div class="flex justify-between items-start">
-              <div>
+          <div class="bg-white rounded-lg p-2 border border-slate-100 shadow-sm relative ${item.pinned ? 'pinned-card' : ''}">
+            <div class="flex justify-between items-center">
+              <div class="flex items-center gap-1.5">
                 <span class="text-[8px] bg-slate-100 text-slate-500 px-1 py-0.2 rounded font-medium">${item.region} ${item.district || ''}</span>
-                <h3 class="font-bold text-xs text-slate-800 mt-0.5">${item.name}</h3>
+                <h3 class="font-bold text-xs text-slate-800">${item.name}</h3>
               </div>
               <div class="flex items-center gap-1">
-                <button onclick="togglePin('${item.id}')" class="text-[10px] ${item.pinned ? 'text-indigo-600' : 'text-slate-300'} p-0.5">
+                <button onclick="togglePin('${item.id}')" class="text-[9px] ${item.pinned ? 'text-indigo-600' : 'text-slate-300'}">
                   <i class="fa-solid fa-thumbtack"></i>
                 </button>
-                <span class="text-[9px] font-bold px-1 py-0.2 rounded ${isUp ? 'bg-up-red' : 'bg-down-blue'}">
+                <span class="text-[8px] font-bold px-1 py-0.2 rounded ${isUp ? 'bg-up-red' : 'bg-down-blue'}">
                   ${isUp ? '▲' : '▼'} ${Math.abs(rate)}%
                 </span>
               </div>
             </div>
 
-            <div class="flex justify-between items-center mt-1.5 pt-1 border-t border-slate-50 text-[11px]">
+            <div class="flex justify-between items-center mt-1 pt-0.5 border-t border-slate-50 text-[10px]">
               <span class="text-slate-400">실거래: <strong class="text-slate-800">${(currentPrice / 10000).toFixed(1)}억</strong></span>
               <span class="text-slate-400">호가: <strong class="text-indigo-600">${(primaryType.askPrice / 10000).toFixed(1)}억</strong></span>
+              <button onclick="openDrawer('${item.id}')" class="text-indigo-600 font-bold hover:underline text-[9px]">
+                상세보기 <i class="fa-solid fa-chevron-right text-[7px]"></i>
+              </button>
             </div>
-
-            <button onclick="openDrawer('${item.id}')" class="w-full mt-1.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg text-[10px] font-semibold flex items-center justify-center gap-1">
-              상세 분석 <i class="fa-solid fa-chevron-right text-[8px]"></i>
-            </button>
           </div>
         `;
       }).join('');
@@ -600,16 +589,16 @@
       currentRegionFilter = region;
       document.querySelectorAll('.region-btn').forEach(btn => {
         btn.className = (btn.innerText === region)
-          ? 'region-btn px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-indigo-600 text-white'
-          : 'region-btn px-2 py-0.5 rounded-lg text-[11px] font-medium bg-white text-slate-600 border border-slate-200';
+          ? 'region-btn px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-600 text-white'
+          : 'region-btn px-2 py-0.5 rounded text-[10px] font-medium bg-white text-slate-600 border border-slate-200';
       });
       renderCards();
     }
 
-    // --- 지능형 통합 검색 (단지명 + 지역명) ---
-    function handleSearch(val) {
+    // --- 메인 실시간 자동완성 검색 ---
+    function handleMainSearch(val) {
       renderCards();
-      const list = document.getElementById('mainSearchPredictList');
+      const list = document.getElementById('mainPredictList');
       if (!val.trim()) { list.classList.add('hidden'); return; }
 
       const matches = NATIONAL_REAL_ESTATE_DB.filter(m => 
@@ -631,7 +620,7 @@
 
     function selectPredictItem(name) {
       document.getElementById('searchInput').value = name;
-      document.getElementById('mainSearchPredictList').classList.add('hidden');
+      document.getElementById('mainPredictList').classList.add('hidden');
       renderCards();
     }
 
@@ -745,7 +734,7 @@
       closeAddModal();
     }
 
-    // --- 상식 백과 50+ 랜더링 및 필터 ---
+    // --- 상식 백과 52개 랜더링 및 필터 ---
     function renderKnowledgeList(category) {
       const container = document.getElementById('knowledgeListContainer');
       let items = KNOWLEDGE_DB;
@@ -755,20 +744,20 @@
 
       container.innerHTML = items.map(item => `
         <div class="p-2 bg-slate-50 rounded-xl border border-slate-100">
-          <div class="flex items-center gap-1.5 mb-0.5">
+          <div class="flex items-center gap-1 mb-0.5">
             <span class="text-[8px] bg-indigo-100 text-indigo-700 px-1 py-0.2 rounded font-bold">No.${item.id}</span>
             <h4 class="font-bold text-xs text-slate-800">${item.title}</h4>
           </div>
-          <p class="text-[11px] text-slate-600 leading-relaxed">${item.desc}</p>
+          <p class="text-[10px] text-slate-600 leading-relaxed">${item.desc}</p>
         </div>
       `).join('');
     }
 
-    function filterKnowledge(category) {
+    function filterKnowledge(category, btnEl) {
       document.querySelectorAll('.know-cat-btn').forEach(btn => {
-        btn.className = 'know-cat-btn px-2 py-1 rounded-lg text-[10px] font-medium bg-slate-100 text-slate-600';
+        btn.className = 'know-cat-btn shrink-0 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600';
       });
-      event.target.className = 'know-cat-btn px-2 py-1 rounded-lg text-[10px] font-bold bg-indigo-600 text-white';
+      btnEl.className = 'know-cat-btn shrink-0 px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-600 text-white';
       renderKnowledgeList(category);
     }
 
