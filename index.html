@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>tol9u 부동산 시세 레이더 v10.0</title>
+  <title>tol9u 부동산 시세 레이더 v11.0</title>
   <!-- Tailwind CSS & Chart.js & FontAwesome -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -14,10 +14,10 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
-    /* 정확히 4개 카드가 잘리지 않고 한눈에 100% 들어오도록 정밀 설계된 높이 */
+    /* 4개 카드가 잘림 없이 딱 들어가도록 정밀 설계된 세로 스크롤 영역 */
     .card-scroll-area {
-      height: 325px;
-      max-height: 325px;
+      height: 320px;
+      max-height: 320px;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
     }
@@ -34,7 +34,7 @@
   <!-- Main Content Wrapper -->
   <div class="pb-1">
     <!-- Top Header -->
-    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 px-3 py-1.5">
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-3 py-1.5">
       <div class="flex items-center justify-between gap-2">
         <div class="flex items-center gap-1.5">
           <div id="topLogo" class="w-6 h-6 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-sm cursor-pointer">
@@ -42,7 +42,7 @@
           </div>
           <div>
             <h1 class="font-bold text-xs text-slate-800 tracking-tight leading-none">tol9u 부동산 시세 레이더</h1>
-            <span class="text-[8px] text-indigo-600 font-semibold">Real-time Radar v10.0</span>
+            <span class="text-[8px] text-indigo-600 font-semibold">Real-time Radar v11.0</span>
           </div>
         </div>
         <div class="flex items-center gap-1">
@@ -55,13 +55,13 @@
         </div>
       </div>
 
-      <!-- Search Input (자동완성 팝업 최우선 보장) -->
+      <!-- Search Input (자동완성 z-index 최상위 보장) -->
       <div class="mt-1 relative">
         <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-slate-400 text-[10px]"></i>
         <input type="text" id="searchInput" oninput="handleMainSearch(this.value)" placeholder="지역명(서울, 송파...) 또는 아파트명 검색..." 
           class="w-full pl-7 pr-3 py-1 bg-slate-100 rounded-lg text-[11px] focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
         <!-- 실시간 자동완성 결과 드롭다운 -->
-        <ul id="mainPredictList" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-48 overflow-y-auto hidden z-50"></ul>
+        <ul id="mainPredictList" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-48 overflow-y-auto hidden z-[9999]"></ul>
       </div>
     </header>
 
@@ -135,7 +135,7 @@
       </div>
     </section>
 
-    <!-- Card Grid List (4개 카드 한눈에 100% 완전 노출 스크롤 존) -->
+    <!-- Card Grid List (4개 카드 한눈에 100% 노출) -->
     <main class="px-2">
       <div class="text-[8px] text-slate-400 mb-0.5 flex justify-between items-center">
         <span>* 📌 핀 고정 최대 2개 지원</span>
@@ -162,7 +162,7 @@
   <footer class="py-1.5 px-2 text-center text-[8px] text-slate-400 border-t border-slate-200 bg-white space-y-0.5">
     <div class="flex items-center justify-center gap-1">
       <span id="footerT9" onclick="promptAdminPassword()" class="font-bold text-indigo-600 cursor-pointer hover:underline bg-indigo-50 px-1 py-0.2 rounded border border-indigo-100">T9</span>
-      <span class="font-bold text-slate-700">tol9u 부동산 시세 레이더 v10.0</span>
+      <span class="font-bold text-slate-700">tol9u 부동산 시세 레이더 v11.0</span>
     </div>
     <p>© 2026 tol9u. All rights reserved. | 문의: <a href="mailto:dotol9u@gmail.com" class="underline">dotol9u@gmail.com</a></p>
   </footer>
@@ -207,7 +207,7 @@
     </div>
   </div>
 
-  <!-- Modal: 단지 추가 (자동완성 강화) -->
+  <!-- Modal: 단지 추가 (자동완성 완벽 연동) -->
   <div id="addModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-3">
     <div class="bg-white rounded-2xl w-full max-w-xs p-3.5 shadow-2xl relative">
       <h3 class="text-xs font-bold text-slate-800 mb-1.5">신규 관심 단지 추가</h3>
@@ -217,7 +217,7 @@
         <label class="block text-[9px] font-medium text-slate-500 mb-0.5">지역명 또는 아파트명 (실시간 예측검색)</label>
         <input type="text" id="modalSearchName" oninput="onModalSearchInput(this.value)" placeholder="예: 서울, 송파, 반포자이, 엘시티..." 
           class="w-full px-2 py-1 text-xs bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        <ul id="autoCompleteList" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-36 overflow-y-auto hidden z-50"></ul>
+        <ul id="autoCompleteList" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-36 overflow-y-auto hidden z-[9999]"></ul>
       </div>
 
       <form id="addApartForm" onsubmit="handleAddApart(event)" class="space-y-1.5">
@@ -257,23 +257,23 @@
     </div>
   </div>
 
-  <!-- Modal: [소분류 탭 안 잘리게 완벽 교정된] 부동산 & 법률 상식 백과 (52개) -->
+  <!-- Modal: [소분류 탭 잘림 문제 완전 해결형] 부동산 & 법률 상식 백과 (52개) -->
   <div id="knowledgeModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-3">
-    <div class="bg-white rounded-2xl w-full max-w-sm p-3 shadow-2xl max-h-[82vh] flex flex-col">
-      <div class="flex justify-between items-center pb-1.5 border-b border-slate-100">
+    <div class="bg-white rounded-2xl w-full max-w-sm p-3.5 shadow-2xl max-h-[82vh] flex flex-col">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-100">
         <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1">
           <i class="fa-solid fa-scale-balanced text-indigo-600"></i> 부동산 & 법률 백과 (52)
         </h3>
         <button onclick="toggleKnowledgeModal()" class="text-slate-400 text-sm"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
-      <!-- 소분류 탭: shrink-0 추가로 절대 잘리지 않게 완전 보장 -->
-      <div class="flex gap-1 my-2 overflow-x-auto no-scrollbar py-0.5 border-b border-slate-100">
-        <button onclick="filterKnowledge('all', this)" class="know-cat-btn shrink-0 px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-600 text-white">전체(52)</button>
-        <button onclick="filterKnowledge('law', this)" class="know-cat-btn shrink-0 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">법률/임대차</button>
-        <button onclick="filterKnowledge('tax', this)" class="know-cat-btn shrink-0 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">세금/절세</button>
-        <button onclick="filterKnowledge('finance', this)" class="know-cat-btn shrink-0 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">대출/금융</button>
-        <button onclick="filterKnowledge('sub', this)" class="know-cat-btn shrink-0 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">청약/분양</button>
+      <!-- 소분류 탭: 잘림을 방지하기 위해 Wrap 방식 및 컴팩트 칩으로 교체 -->
+      <div class="flex flex-wrap gap-1 my-2 py-1 border-b border-slate-100">
+        <button onclick="filterKnowledge('all', this)" class="know-cat-btn px-2 py-1 rounded-md text-[10px] font-bold bg-indigo-600 text-white">전체(52)</button>
+        <button onclick="filterKnowledge('law', this)" class="know-cat-btn px-2 py-1 rounded-md text-[10px] font-medium bg-slate-100 text-slate-600">법률/임대차</button>
+        <button onclick="filterKnowledge('tax', this)" class="know-cat-btn px-2 py-1 rounded-md text-[10px] font-medium bg-slate-100 text-slate-600">세금/절세</button>
+        <button onclick="filterKnowledge('finance', this)" class="know-cat-btn px-2 py-1 rounded-md text-[10px] font-medium bg-slate-100 text-slate-600">대출/금융</button>
+        <button onclick="filterKnowledge('sub', this)" class="know-cat-btn px-2 py-1 rounded-md text-[10px] font-medium bg-slate-100 text-slate-600">청약/분양</button>
       </div>
 
       <!-- 상식 리스트 스크롤 영역 -->
@@ -361,8 +361,8 @@
   </div>
 
   <script>
-    // --- 전국 아파트 데이터베이스 ---
-    const NATIONAL_REAL_ESTATE_DB = [
+    // --- 전국 아파트 검색용 데이터베이스 ---
+    let NATIONAL_REAL_ESTATE_DB = [
       { id: "apt-1", name: "반포자이", region: "서울", district: "서초구", pinned: true, types: [{ name: "84A", realPrice: 360000, askPrice: 365000, history: [345000, 350000, 355000, 360000] }], upside: "반포 재건축 이주 수요 흡수, 학군 최상위", risk: "보유세 부담 지속" },
       { id: "apt-2", name: "헬리오시티", region: "서울", district: "송파구", pinned: true, types: [{ name: "84A", realPrice: 215000, askPrice: 218000, history: [200000, 205000, 210000, 215000] }], upside: "9,510세대 대단지, 위례신사선 추진 호재", risk: "송파/강동 공급물량 변동성" },
       { id: "apt-3", name: "마포래미안푸르지오", region: "서울", district: "마포구", pinned: false, types: [{ name: "84B", realPrice: 182000, askPrice: 185000, history: [175000, 178000, 180000, 182000] }], upside: "여의도/광화문 직주근접 최상위", risk: "추가 상승 모멘텀 완만" },
@@ -496,10 +496,18 @@
       document.getElementById('kpiDown').innerText = down;
     }
 
+    // 공백 무시 및 유연한 검색 매칭 함수
+    function matchSearchQuery(sourceStr, query) {
+      if (!sourceStr || !query) return false;
+      const cleanSource = sourceStr.replace(/\s+/g, '').toLowerCase();
+      const cleanQuery = query.replace(/\s+/g, '').toLowerCase();
+      return cleanSource.includes(cleanQuery);
+    }
+
     // --- 정확한 4개 카드 한눈에 노출 렌더링 ---
     function renderCards() {
       const container = document.getElementById('cardContainer');
-      const searchKeyword = document.getElementById('searchInput').value.trim().toLowerCase();
+      const searchKeyword = document.getElementById('searchInput').value.trim();
       const sortOption = document.getElementById('sortOption').value;
 
       // 단지 중복 방지
@@ -515,9 +523,10 @@
 
       let filtered = uniqueList.filter(item => {
         const matchRegion = (currentRegionFilter === '전체') || (item.region === currentRegionFilter);
-        const matchSearch = item.name.toLowerCase().includes(searchKeyword) || 
-                            item.region.toLowerCase().includes(searchKeyword) ||
-                            (item.district && item.district.toLowerCase().includes(searchKeyword));
+        const matchSearch = !searchKeyword || 
+                            matchSearchQuery(item.name, searchKeyword) || 
+                            matchSearchQuery(item.region, searchKeyword) ||
+                            (item.district && matchSearchQuery(item.district, searchKeyword));
         return matchRegion && matchSearch;
       });
 
@@ -595,24 +604,24 @@
       renderCards();
     }
 
-    // --- 메인 실시간 자동완성 검색 ---
+    // --- 메인 실시간 완벽 자동완성 검색 ---
     function handleMainSearch(val) {
       renderCards();
       const list = document.getElementById('mainPredictList');
-      if (!val.trim()) { list.classList.add('hidden'); return; }
+      if (!val || !val.trim()) { list.classList.add('hidden'); return; }
 
       const matches = NATIONAL_REAL_ESTATE_DB.filter(m => 
-        m.name.toLowerCase().includes(val.toLowerCase()) || 
-        m.region.toLowerCase().includes(val.toLowerCase()) ||
-        (m.district && m.district.toLowerCase().includes(val.toLowerCase()))
+        matchSearchQuery(m.name, val) || 
+        matchSearchQuery(m.region, val) ||
+        (m.district && matchSearchQuery(m.district, val))
       );
 
       if (matches.length === 0) { list.classList.add('hidden'); return; }
 
       list.innerHTML = matches.map(m => `
-        <li onclick="selectPredictItem('${m.name}')" class="px-2.5 py-1.5 text-xs hover:bg-indigo-50 cursor-pointer border-b border-slate-100 flex justify-between">
+        <li onclick="selectPredictItem('${m.name}')" class="px-2.5 py-1.5 text-xs hover:bg-indigo-50 cursor-pointer border-b border-slate-100 flex justify-between items-center">
           <span class="font-bold text-slate-800">${m.name}</span>
-          <span class="text-slate-400 text-[10px]">${m.region} ${m.district||''}</span>
+          <span class="text-slate-400 text-[10px] bg-slate-50 px-1 py-0.2 rounded">${m.region} ${m.district||''}</span>
         </li>
       `).join('');
       list.classList.remove('hidden');
@@ -665,7 +674,7 @@
 
     function closeDrawer() { document.getElementById('detailDrawer').classList.add('hidden'); }
 
-    // --- 모달 단지 추가 자동완성 ---
+    // --- 모달 단지 추가 및 자동완성 ---
     function openAddModal() { document.getElementById('addModal').classList.remove('hidden'); }
     function closeAddModal() { 
       document.getElementById('addModal').classList.add('hidden');
@@ -674,20 +683,20 @@
 
     function onModalSearchInput(val) {
       const list = document.getElementById('autoCompleteList');
-      if (!val.trim()) { list.classList.add('hidden'); return; }
+      if (!val || !val.trim()) { list.classList.add('hidden'); return; }
 
       const matches = NATIONAL_REAL_ESTATE_DB.filter(db => 
-        db.name.toLowerCase().includes(val.toLowerCase()) ||
-        db.region.toLowerCase().includes(val.toLowerCase()) ||
-        (db.district && db.district.toLowerCase().includes(val.toLowerCase()))
+        matchSearchQuery(db.name, val) ||
+        matchSearchQuery(db.region, val) ||
+        (db.district && matchSearchQuery(db.district, val))
       );
 
       if (matches.length === 0) { list.classList.add('hidden'); return; }
 
       list.innerHTML = matches.map(m => `
-        <li onclick="selectAutoComplete('${m.name}')" class="px-2.5 py-1.5 text-xs hover:bg-indigo-50 cursor-pointer border-b border-slate-100 flex justify-between">
+        <li onclick="selectAutoComplete('${m.name}')" class="px-2.5 py-1.5 text-xs hover:bg-indigo-50 cursor-pointer border-b border-slate-100 flex justify-between items-center">
           <span class="font-bold text-slate-800">${m.name}</span>
-          <span class="text-slate-400 text-[10px]">${m.region} ${m.district||''}</span>
+          <span class="text-slate-400 text-[10px] bg-slate-50 px-1 py-0.2 rounded">${m.region} ${m.district||''}</span>
         </li>
       `).join('');
       list.classList.remove('hidden');
@@ -728,6 +737,7 @@
       };
 
       appData.unshift(newApt);
+      NATIONAL_REAL_ESTATE_DB.unshift(newApt); // 검색 데이터베이스에도 즉시 반영
       saveData();
       renderCards();
       updateKPI();
@@ -755,9 +765,9 @@
 
     function filterKnowledge(category, btnEl) {
       document.querySelectorAll('.know-cat-btn').forEach(btn => {
-        btn.className = 'know-cat-btn shrink-0 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600';
+        btn.className = 'know-cat-btn px-2 py-1 rounded-md text-[10px] font-medium bg-slate-100 text-slate-600';
       });
-      btnEl.className = 'know-cat-btn shrink-0 px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-600 text-white';
+      btnEl.className = 'know-cat-btn px-2 py-1 rounded-md text-[10px] font-bold bg-indigo-600 text-white';
       renderKnowledgeList(category);
     }
 
